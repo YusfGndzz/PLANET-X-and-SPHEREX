@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Harman - SPHEREx Zaman Tüneli</title>
+    <meta name="description" content="Gökyüzü koordinatı girin, SPHEREx görüntülerini zaman içinde küçük bir video gibi izleyin.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+    <nav class="topbar">
+        <a href="index.html"><b>Harman</b><i>/</i>SPHEREx Zaman Tüneli</a>
+        <a href="index.html">← Ana sayfa</a>
+    </nav>
+    <div class="container">
+        <header>
+            <h1>Zaman Tüneli</h1>
+            <p>NASA SPHEREx verileriyle gökyüzündeki değişimi keşfedin: hareket eden cisimler ve değişen yıldızlar.</p>
+        </header>
+
+        <section aria-label="Hazır hedefler">
+            <div id="target-buttons"></div>
+            <p id="target-desc" class="hint center" aria-live="polite"></p>
+        </section>
+
+        <form id="search-form" class="form" novalidate>
+            <div class="field field-name">
+                <label for="name-input">Cisim adı</label>
+                <div class="inline">
+                    <input type="text" id="name-input" placeholder="örn. Barnard's Star" autocomplete="off">
+                    <button type="button" id="resolve-btn" class="btn-secondary">Bul</button>
+                </div>
+                <p class="error" id="name-error" role="alert"></p>
+            </div>
+
+            <div class="field">
+                <label for="ra-input">Sağ açıklık (RA)</label>
+                <input type="text" id="ra-input" placeholder="133.7951 veya 08h55m10.83s" autocomplete="off" inputmode="text">
+                <p class="error" id="ra-error" role="alert"></p>
+            </div>
+
+            <div class="field">
+                <label for="dec-input">Dik açıklık (Dec)</label>
+                <input type="text" id="dec-input" placeholder="-7.2451 veya -7d14m42.5s" autocomplete="off" inputmode="text">
+                <p class="error" id="dec-error" role="alert"></p>
+            </div>
+
+            <div class="field field-small">
+                <label for="fov-input">Görüş alanı</label>
+                <div class="unit-wrap">
+                    <input type="number" id="fov-input" value="4" min="1" max="30" step="0.5">
+                    <span class="unit">yay dk (′)</span>
+                </div>
+                <p class="error" id="fov-error" role="alert"></p>
+            </div>
+
+            <div class="field">
+                <label for="band-select">Dedektör / dalga boyu</label>
+                <select id="band-select"></select>
+                <p class="hint" id="band-hint"></p>
+            </div>
+
+            <div class="field field-small">
+                <label for="frames-input">Kare sayısı</label>
+                <input type="number" id="frames-input" value="12" min="2" max="40" step="1">
+                <p class="error" id="frames-error" role="alert"></p>
+            </div>
+
+            <div class="field field-submit">
+                <button type="submit" id="load-btn" class="btn-primary">Görüntüleri Yükle</button>
+            </div>
+        </form>
+
+        <div id="status" class="status" role="status" aria-live="polite" hidden>
+            <div class="status-line">
+                <span id="status-text"></span>
+                <span id="status-elapsed" class="elapsed"></span>
+            </div>
+            <div id="status-bar" class="progress" hidden><div></div></div>
+            <p id="status-sub" class="hint"></p>
+        </div>
+
+        <div id="empty-state" class="viewer-empty">
+            <p>Henüz bir bölge yüklenmedi.</p>
+            <p class="hint">Yukarıdan bir hedef seçin ya da koordinat girip “Görüntüleri Yükle”ye basın.</p>
+        </div>
+
+        <div id="results" hidden>
+            <div class="result-head">
+                <p id="result-summary" class="summary"></p>
+                <div class="share">
+                    <button type="button" id="copy-link-btn" class="btn-secondary">Bağlantıyı kopyala</button>
+                    <span id="copy-feedback" class="hint" aria-live="polite"></span>
+                </div>
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="Görünüm modu">
+                <button type="button" role="tab" class="tab active" data-mode="frames" aria-selected="true">Kareler</button>
+                <button type="button" role="tab" class="tab" data-mode="epochs" aria-selected="false">Dönem yığınları</button>
+                <button type="button" role="tab" class="tab" data-mode="diff" aria-selected="false">Fark</button>
+                <button type="button" role="tab" class="tab" data-mode="gif" aria-selected="false">GIF</button>
+            </div>
+
+            <div class="viewer-grid">
+                <div class="stage-col">
+                    <div id="stage" class="stage">
+                        <canvas id="stage-canvas" width="64" height="64" aria-label="SPHEREx görüntüsü"></canvas>
+                        <img id="stage-gif" alt="SPHEREx zaman tüneli GIF" hidden>
+                        <svg id="reticle" class="reticle" viewBox="0 0 100 100" aria-hidden="true">
+                            <circle cx="50" cy="50" r="6"></circle>
+                            <line x1="50" y1="34" x2="50" y2="44"></line>
+                            <line x1="50" y1="56" x2="50" y2="66"></line>
+                            <line x1="34" y1="50" x2="44" y2="50"></line>
+                            <line x1="56" y1="50" x2="66" y2="50"></line>
+                        </svg>
+                        <span class="stage-tag tl" id="stage-compass">K ↑ &nbsp; D ←</span>
+                        <span class="stage-tag tr" id="stage-fov"></span>
+                        <span class="stage-tag bl" id="stage-label"></span>
+                        <div id="stage-message" class="stage-message" hidden></div>
+                    </div>
+
+                    <div id="player-controls" class="player">
+                        <div class="player-row">
+                            <button type="button" id="prev-btn" class="icon-btn" title="Önceki kare (←)" aria-label="Önceki kare">⏮</button>
+                            <button type="button" id="play-btn" class="icon-btn play" title="Oynat / duraklat (boşluk)" aria-label="Oynat">▶</button>
+                            <button type="button" id="next-btn" class="icon-btn" title="Sonraki kare (→)" aria-label="Sonraki kare">⏭</button>
+                            <input type="range" id="scrubber" min="0" max="0" value="0" step="1" aria-label="Kare seçici">
+                            <span id="frame-counter" class="counter">0 / 0</span>
+                        </div>
+                        <div class="player-row options">
+                            <label>Hız
+                                <select id="speed-select">
+                                    <option value="1">1 kare/sn</option>
+                                    <option value="2" selected>2 kare/sn</option>
+                                    <option value="4">4 kare/sn</option>
+                                    <option value="8">8 kare/sn</option>
+                                </select>
+                            </label>
+                            <label class="check"><input type="checkbox" id="loop-check" checked> Döngü</label>
+                            <label class="check"><input type="checkbox" id="reticle-check" checked> Nişangâh</label>
+                        </div>
+                    </div>
+                    <div id="diff-controls" class="diff-controls" hidden>
+                        <div class="diff-row">
+                            <label for="diff-a">Bu görüntüden
+                                <select id="diff-a"></select>
+                            </label>
+                            <span class="diff-minus" aria-hidden="true">−</span>
+                            <label for="diff-b">bunu çıkar
+                                <select id="diff-b"></select>
+                            </label>
+                            <button type="button" id="diff-swap" class="icon-btn" title="İkisini yer değiştir" aria-label="Yer değiştir">⇄</button>
+                            <button type="button" id="diff-btn" class="btn-primary">Farkı hesapla</button>
+                        </div>
+                        <p id="diff-msg" class="hint" aria-live="polite"></p>
+                    </div>
+                    <p id="mode-caption" class="hint"></p>
+                    <p id="gif-links" class="hint" hidden></p>
+                </div>
+
+                <div class="meta-col">
+                    <h2>Kare bilgisi</h2>
+                    <dl id="meta-list" class="meta"></dl>
+                    <h2>Hedef</h2>
+                    <dl id="target-list" class="meta"></dl>
+                </div>
+            </div>
+
+            <section class="panel" id="spectrum-section">
+                <h2>Tayf (akı – dalga boyu)</h2>
+                <p id="spectrum-note" class="hint"></p>
+                <div id="spectrum-wrap" class="chart-wrap">
+                    <div id="spectrum-legend" class="legend"></div>
+                    <div id="spectrum-chart" class="chart"></div>
+                    <div id="spectrum-tip" class="tooltip" hidden></div>
+                    <details class="table-details">
+                        <summary>Tablo olarak göster</summary>
+                        <div class="table-scroll"><table id="spectrum-table"></table></div>
+                    </details>
+                </div>
+            </section>
+
+            <section class="panel" id="aladin-section">
+                <h2>Karşılaştırma: diğer gökyüzü taramaları</h2>
+                <div class="skyref-controls">
+                    <label>Tarama
+                        <select id="survey-select">
+                            <option value="P/DSS2/color">DSS2 (renkli, görünür ışık)</option>
+                            <option value="P/2MASS/color">2MASS (yakın kızılötesi)</option>
+                            <option value="P/allWISE/color">AllWISE (orta kızılötesi)</option>
+                        </select>
+                    </label>
+                    <label class="check"><input type="checkbox" id="gaia-check"> Gaia DR3 kaynakları</label>
+                </div>
+                <div id="skyref-box" class="skyref-box">
+                    <div id="aladin-lite-div"></div>
+                    <p id="skyref-msg" class="skyref-msg">Aladin Lite yükleniyor…</p>
+                </div>
+                <p class="hint">Aynı merkez ve aynı görüş alanı. Kuzey yukarı, doğu solda. Aladin Lite (CDS, Strasbourg) ile sunulur.</p>
+            </section>
+        </div>
+
+        <details class="panel help">
+            <summary>Nasıl kullanılır / neye bakmalıyım?</summary>
+            <ul>
+                <li><strong>Koordinat:</strong> ondalık derece (<code>133.7951</code>, <code>-7.2451</code>) ya da altmışlık biçim (<code>08h55m10.83s</code>, <code>08:55:10.83</code>, <code>-7d14m42.5s</code>) girebilir veya cisim adını yazıp “Bul”a basabilirsiniz.</li>
+                <li><strong>Hareket çok küçüktür:</strong> bir SPHEREx pikseli yaklaşık 6″’dir. Barnard Yıldızı bile yılda yalnızca ~10″ (iki pikselden az) kayar. Tek tek karelerde değil, <em>Dönem yığınları</em> ve <em>Fark</em> sekmelerinde dönemleri karşılaştırın.</li>
+                <li><strong>Nişangâh</strong> girdiğiniz konumu işaretler; cisim nişangâha göre kayıyorsa hareket ediyordur.</li>
+                <li><strong>Fark görüntüsü:</strong> hareket eden cisim yan yana bir siyah–beyaz çift, parlaklığı değişen yıldız tek bir siyah ya da beyaz nokta bırakır; sabit yıldızlar silinir.</li>
+                <li><strong>Değişen yıldızlar:</strong> kareler farklı dalga boylarında çekildiği için parlaklık değişimini tayf grafiğinde aynı dalga boyundaki farklı dönem noktalarını karşılaştırarak arayın.</li>
+                <li><strong>Dalga boyu:</strong> soğuk kahverengi cüceler (örn. WISE 0855) yalnızca D6 (~4.6 µm) bandında görünür.</li>
+                <li><strong>Klavye:</strong> boşluk = oynat/duraklat, ← / → = kare kare ilerle.</li>
+                <li>İlk istek, veriler NASA IRSA’dan indirildiği için bir dakika ya da daha uzun sürebilir; aynı bölge sonraki sefer önbellekten hızlı gelir.</li>
+            </ul>
+        </details>
+
+        <footer>
+            <p>Veri: NASA SPHEREx / IRSA (IPAC). NASA Space Apps Challenge projesi.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

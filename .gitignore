@@ -1,0 +1,24 @@
+# Sanal ortam
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Buyuk bilim verisi: GitHub'a GITMEZ
+*.fits
+*.fits.gz
+*.fit
+cache/
+notebooks/data/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Gizli ayarlar
+.env
+
+# Isletim sistemi
+.DS_Store
+Thumbs.db

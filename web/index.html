@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Harman — SPHEREx Zaman Tüneli</title>
+    <meta name="description" content="NASA'nın SPHEREx uydusunun aynı gökyüzü noktasını farklı tarihlerde çektiği görüntüleri art arda oynatan açık araç.">
+    <script>
+        /* Gömme ve paylaşım bağlantıları: /?ra=..&dec=.. doğrudan araca gider */
+        (function () {
+            var q = new URLSearchParams(location.search);
+            if (q.has("ra") || q.has("dec") || q.has("name")) location.replace("explorer.html" + location.search);
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+
+<nav class="nav" id="nav">
+    <a class="nav-mark" href="#top"><span>Harman</span><i>/</i>SPHEREx Zaman Tüneli</a>
+    <div class="nav-links">
+        <a href="#uydu">Uydu</a>
+        <a href="#renkler">102 renk</a>
+        <a href="#hedefler">Hedefler</a>
+        <a href="#kaynaklar">Kaynaklar</a>
+    </div>
+    <a class="nav-cta" href="explorer.html">Aracı aç <span aria-hidden="true">→</span></a>
+</nav>
+
+<header class="hero" id="top">
+    <canvas id="hero-sky" aria-hidden="true"></canvas>
+    <div class="hero-scrim" aria-hidden="true"></div>
+    <div class="hero-body">
+        <p class="eyebrow">NASA Space Apps Challenge 2026 · Takım Harman</p>
+        <h1>Gökyüzü yerinde<br><em>durmuyor.</em></h1>
+        <p class="hero-lede">SPHEREx her altı ayda bir bütün gökyüzünü 102 kızılötesi renkte yeniden çekiyor.
+            Aynı noktanın farklı tarihlerdeki karelerini art arda oynatırsanız, kıpırdayan ve parlaklığı
+            değişen her şey kendini ele verir.</p>
+        <div class="hero-actions">
+            <a class="btn btn-solid" href="explorer.html">Aracı aç <span aria-hidden="true">→</span></a>
+            <a class="btn btn-line" href="#uydu">Nasıl çalışıyor</a>
+        </div>
+    </div>
+    <dl class="hero-readout">
+        <div><dt>Görev günü</dt><dd id="ro-day">—</dd></div>
+        <div><dt>Gökyüzü taraması</dt><dd id="ro-survey">—</dd></div>
+        <div><dt>Yörünge yüksekliği</dt><dd id="ro-alt">—</dd></div>
+        <div><dt>Görüş merkezi</dt><dd id="ro-center">—</dd></div>
+    </dl>
+    <p class="hero-credit" id="hero-credit">Arka plan: gerçek yıldız konumları</p>
+</header>
+
+<main>
+
+<section class="sec" id="uydu">
+    <div class="sec-head reveal">
+        <span class="sec-no">01</span>
+        <h2>Bir megafona benzeyen,<br>Dünya'ya hep sırtını dönen teleskop</h2>
+    </div>
+    <div class="cols">
+        <div class="prose reveal">
+            <p>SPHEREx 11 Mart 2025'te Kaliforniya'daki Vandenberg üssünden bir Falcon 9 ile fırlatıldı.
+                Kutuplardan geçen bir yörüngede, gece ile gündüzü ayıran çizginin tam üstünde dolanıyor.
+                Bu sayede Güneş hep aynı yanında kalıyor ve teleskop her an Dünya'nın tersine,
+                karanlık uzaya bakabiliyor.</p>
+            <p>İç içe geçmiş üç koni kalkan, Güneş'in ve Dünya'nın ısısını teleskoptan uzak tutuyor.
+                Kızılötesi ışık aslında ısı olduğu için bu şart: alet yaklaşık −210 °C'de çalışıyor
+                ve bunu hiçbir soğutucu yakmadan, sadece gölgede kalarak başarıyor.</p>
+            <p>Her turda gökyüzünden ince bir şerit çekiyor. Dünya Güneş'in çevresinde ilerledikçe
+                şerit de kayıyor ve altı ayda gökyüzünün tamamı kapanıyor. Sonra baştan başlıyor.
+                Bizim işimize yarayan tam olarak bu tekrar.</p>
+            <dl class="facts">
+                <div><dt>Ayna çapı</dt><dd>20 cm</dd></div>
+                <div><dt>Dalga boyu</dt><dd>0,75 – 5,0 µm</dd></div>
+                <div><dt>Piksel</dt><dd>6,2″</dd></div>
+                <div><dt>Tam gökyüzü</dt><dd>6 ayda bir</dd></div>
+            </dl>
+        </div>
+        <figure class="fig reveal" id="fig-orbit">
+            <div class="fig-frame">
+                <canvas id="globe"></canvas>
+                <div class="fig-tools">
+                    <button type="button" class="seg is-on" data-speed="1">Gerçek zaman</button>
+                    <button type="button" class="seg" data-speed="120">×120</button>
+                </div>
+                <div class="fig-tools fig-tools-r" id="view-tools" hidden>
+                    <button type="button" class="seg is-on" data-view="0">Dünya</button>
+                    <button type="button" class="seg" data-view="1">Uyduyu izle</button>
+                </div>
+            </div>
+            <dl class="readout" id="orbit-readout">
+                <div><dt>Enlem</dt><dd id="or-lat">—</dd></div>
+                <div><dt>Boylam</dt><dd id="or-lon">—</dd></div>
+                <div><dt>Yükseklik</dt><dd id="or-alt">—</dd></div>
+                <div><dt>Hız</dt><dd id="or-vel">—</dd></div>
+                <div><dt>Bir tur</dt><dd id="or-per">—</dd></div>
+                <div><dt>Eğiklik</dt><dd id="or-inc">—</dd></div>
+            </dl>
+            <figcaption><b>Şek. 1</b> SPHEREx'in şu anki gerçek konumu. Dünya'nın dönüşü, Güneş'in yönü, gece tarafındaki şehir ışıkları ve arkadaki yıldızlar o ana göre hesaplanır; sürükleyerek çevirebilirsiniz. Uydu modeli görünsün diye büyütülmüştür.
+                <span id="orbit-src">Yörünge verisi yükleniyor…</span></figcaption>
+        </figure>
+    </div>
+</section>
+
+<section class="sec" id="renkler">
+    <div class="sec-head reveal">
+        <span class="sec-no">02</span>
+        <h2>Tek fotoğraf değil,<br>her yıldız için 102 ölçüm</h2>
+    </div>
+    <div class="cols cols-flip">
+        <figure class="fig reveal" id="fig-lvf">
+            <div class="fig-frame"><canvas id="lvf"></canvas></div>
+            <figcaption><b>Şek. 2</b> Şematik gösterim, gerçek ölçüm değil. Renkler temsilîdir:
+                kızılötesi ışığı göz görmez. Soğurma çukurlarının yerleri gerçek moleküllere aittir.</figcaption>
+        </figure>
+        <div class="prose reveal">
+            <p>SPHEREx'te dönen bir filtre tekeri yok. Altı dedektörün her birinin önünde, bir ucundan
+                öbür ucuna geçirdiği renk yavaşça değişen bir filtre duruyor. Yani aynı karede
+                görüntünün üstü ile altı farklı dalga boyunda çekilmiş oluyor.</p>
+            <p>Teleskop her pozdan sonra azıcık kayıyor. Bir yıldız dedektörün üzerinde adım adım
+                ilerlerken her adımda başka bir renkte ölçülüyor. Altı dedektör, her birinde 17 bant:
+                toplam 102 nokta. Bu noktalar yan yana gelince yıldızın tayfı çıkıyor ve su, karbondioksit,
+                karbonmonoksit gibi moleküller tayfta çukur olarak görünüyor.</p>
+            <p class="note">Aracı kullanırken bunu akılda tutun: art arda iki karenin parlaklığı farklıysa
+                sebep yıldızın değişmesi olmayabilir, kare başka bir renkte çekilmiş olabilir. O yüzden
+                her karenin gerçek dalga boyunu yanında gösteriyoruz.</p>
+            <table class="bands">
+                <thead><tr><th>Dedektör</th><th>Aralık, mikron</th><th>Bant</th></tr></thead>
+                <tbody>
+                    <tr><td>D1</td><td>0,75 – 1,11</td><td>17</td></tr>
+                    <tr><td>D2</td><td>1,10 – 1,65</td><td>17</td></tr>
+                    <tr><td>D3</td><td>1,64 – 2,42</td><td>17</td></tr>
+                    <tr><td>D4</td><td>2,42 – 3,82</td><td>17</td></tr>
+                    <tr><td>D5</td><td>3,81 – 4,42</td><td>17</td></tr>
+                    <tr><td>D6</td><td>4,42 – 5,00</td><td>17</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="sec sec-wide" id="hedefler">
+    <div class="sec-head reveal">
+        <span class="sec-no">03</span>
+        <h2>Bir yıldıza gidelim<br>ve bugün nerede olduğuna bakalım</h2>
+        <p class="sec-sub">1930'da Clyde Tombaugh, Plüton'u aynı bölgenin iki fotoğrafını art arda
+            göstererek buldu: bir nokta yer değiştirmişti. Aşağıdaki beş hedef, aracı denemek için
+            seçilmiş cisimler. Birini seçin; gökyüzünde oraya inelim.</p>
+    </div>
+    <figure class="fly reveal" id="fig-fly">
+        <div class="fly-stage">
+            <canvas id="fly-sky"></canvas>
+            <div class="fly-hud">
+                <span id="fly-fov">Alan genişliği —</span>
+                <span id="fly-src">Katalog yükleniyor…</span>
+            </div>
+            <button type="button" class="fly-replay" id="fly-replay">Yeniden oynat</button>
+        </div>
+        <aside class="fly-side">
+            <ol class="targets" id="fly-targets"></ol>
+            <div class="fly-info" id="fly-info" aria-live="polite">
+                <h3 id="fi-name">—</h3>
+                <p id="fi-desc"></p>
+                <dl class="readout readout-2">
+                    <div><dt>Bugünkü konum</dt><dd id="fi-pos">—</dd></div>
+                    <div><dt>Öz hareket</dt><dd id="fi-pm">—</dd></div>
+                    <div><dt>Uzaklık</dt><dd id="fi-dist">—</dd></div>
+                    <div><dt>2000'den beri</dt><dd id="fi-shift">—</dd></div>
+                    <div><dt>SPHEREx çekmeye başlayalı</dt><dd id="fi-px">—</dd></div>
+                </dl>
+                <a class="btn btn-solid" id="fi-open" href="explorer.html">Bu hedefi araçta aç <span aria-hidden="true">→</span></a>
+            </div>
+        </aside>
+        <figcaption><b>Şek. 3</b> Yıldız konumları gerçek katalogdan çizilir. En yakın görünümde
+            kareler birer SPHEREx pikselidir (6,2″). İçi boş halka 2000 yılındaki konum, dolu nokta bugün;
+            turuncu parça SPHEREx'in gözlem yaptığı dönem.</figcaption>
+    </figure>
+</section>
+
+<section class="sec" id="gorev">
+    <div class="sec-head reveal">
+        <span class="sec-no">04</span>
+        <h2>Görevden kareler</h2>
+        <p class="sec-sub">NASA'nın görsel arşivinden, sayfa açıldığında çekilir.</p>
+    </div>
+    <div class="gallery reveal" id="gallery" tabindex="0" aria-label="NASA görsel arşivinden SPHEREx görüntüleri">
+        <p class="gallery-msg" id="gallery-msg">Görseller yükleniyor…</p>
+    </div>
+</section>
+
+<section class="sec" id="kaynaklar">
+    <div class="sec-head reveal">
+        <span class="sec-no">05</span>
+        <h2>Asıl kaynaklar</h2>
+        <p class="sec-sub">Buradaki her şey açık veriden geliyor. Görevin kendi sayfaları ve kullandığımız servisler:</p>
+    </div>
+    <ul class="links reveal">
+        <li><a href="https://spherex.caltech.edu/" target="_blank" rel="noopener"><b>SPHEREx — Caltech</b><span>Görevin resmî sitesi: alet, bilim hedefleri, ekip</span><i>spherex.caltech.edu</i></a></li>
+        <li><a href="https://science.nasa.gov/mission/spherex/" target="_blank" rel="noopener"><b>NASA Science</b><span>Görev özeti ve güncel haberler</span><i>science.nasa.gov</i></a></li>
+        <li><a href="https://www.jpl.nasa.gov/missions/spherex/" target="_blank" rel="noopener"><b>JPL</b><span>Görevi yöneten merkez</span><i>jpl.nasa.gov</i></a></li>
+        <li><a href="https://irsa.ipac.caltech.edu/Missions/spherex.html" target="_blank" rel="noopener"><b>IRSA — SPHEREx verisi</b><span>Aracın görüntüleri çektiği arşiv; haftalık yeni veri</span><i>irsa.ipac.caltech.edu</i></a></li>
+        <li><a href="https://www.backyardworlds.org/" target="_blank" rel="noopener"><b>Backyard Worlds</b><span>Gönüllülerin aynı yöntemle kahverengi cüce aradığı proje</span><i>backyardworlds.org</i></a></li>
+        <li><a href="https://simbad.cds.unistra.fr/simbad/" target="_blank" rel="noopener"><b>SIMBAD</b><span>Hedeflerin konum ve öz hareket değerleri</span><i>simbad.cds.unistra.fr</i></a></li>
+        <li><a href="https://celestrak.org/" target="_blank" rel="noopener"><b>CelesTrak</b><span>Uydunun güncel yörünge elemanları</span><i>celestrak.org</i></a></li>
+        <li><a href="https://www.spaceappschallenge.org/" target="_blank" rel="noopener"><b>NASA Space Apps Challenge</b><span>Bu aracın yapıldığı yarışma</span><i>spaceappschallenge.org</i></a></li>
+    </ul>
+</section>
+
+<section class="outro">
+    <p class="eyebrow reveal">Sıra sizde</p>
+    <h2 class="reveal">Bir koordinat girin,<br><em>neyin kıpırdadığına bakın.</em></h2>
+    <a class="btn btn-solid btn-big reveal" href="explorer.html">Aracı aç <span aria-hidden="true">→</span></a>
+</section>
+
+</main>
+
+<footer class="foot">
+    <p>Harman · NASA Space Apps Challenge 2026</p>
+    <p>Veri: NASA/JPL-Caltech · IRSA (IPAC) · SIMBAD (CDS) · CelesTrak · Natural Earth</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/satellite.js@5.0.0/dist/satellite.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
+<script src="orbit3d.js" defer></script>
+<script src="landing.js" defer></script>
+</body>
+</html>

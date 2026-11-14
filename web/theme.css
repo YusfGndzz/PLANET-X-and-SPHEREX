@@ -1,0 +1,101 @@
+/* Araç sayfasını ana sayfayla aynı görsel dile çeker; style.css'ten sonra yüklenir. */
+:root {
+    --bg-0: #0c0c0d;
+    --bg-1: #0c0c0d;
+    --panel: #131314;
+    --field: #0c0c0d;
+    --line: rgba(236, 232, 223, 0.2);
+    --line-soft: rgba(236, 232, 223, 0.12);
+    --text: #ece8df;
+    --text-2: #b9b4a8;
+    --muted: #7d796f;
+    --accent: #ff5a1f;
+    --accent-strong: #ece8df;
+    --ok: #9fd8a0;
+    --err: #ff8a70;
+    --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+    --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+
+*, *::before, *::after { border-radius: 0 !important; box-shadow: none !important; text-shadow: none !important; }
+::selection { background: var(--accent); color: #0c0c0d; }
+
+body {
+    background: var(--bg-0);
+    font-family: var(--sans);
+    padding: 0 clamp(16px, 4vw, 56px) 60px;
+    -webkit-font-smoothing: antialiased;
+}
+.container {
+    max-width: 1180px;
+    background: none;
+    border: 0;
+    padding: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    max-width: 1180px; margin: 0 auto; padding: 16px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-family: var(--mono); font-size: 12.5px;
+}
+.topbar a { color: var(--text-2); text-decoration: none; }
+.topbar a:hover { color: var(--accent); }
+.topbar b { color: var(--text); font-weight: 500; }
+.topbar i { font-style: normal; color: var(--accent); margin: 0 7px; }
+
+header {
+    text-align: left;
+    border-bottom: 0;
+    padding: clamp(36px, 6vw, 72px) 0 10px;
+    margin-bottom: 18px;
+}
+h1 {
+    font-family: var(--serif); font-weight: 400; color: var(--text);
+    font-size: clamp(40px, 6.5vw, 84px); line-height: 0.98; letter-spacing: -0.015em;
+}
+header p { color: var(--text-2); max-width: 62ch; font-size: 1.05rem; }
+h2, h3 { font-family: var(--mono); font-weight: 500; letter-spacing: 0.12em; }
+
+label, .hint, .tab, button, select, input, th, dt { font-family: var(--mono); }
+dd, td, .meta-value { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+#target-buttons { justify-content: flex-start; }
+#target-buttons button { background: transparent; border-color: var(--line); color: var(--text-2); font-weight: 400; }
+#target-buttons button:hover { background: var(--text); border-color: var(--text); color: #0c0c0d; transform: none; }
+.hint.center { text-align: left; }
+
+input, select { background: var(--field); border-color: var(--line); }
+input:focus, select:focus { border-color: var(--accent); }
+
+.controls button, .controls button:hover,
+.icon-btn.play, .tab.active {
+    background: var(--text); border-color: var(--text); color: #0c0c0d;
+}
+.controls button:hover:not(:disabled), .icon-btn.play:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: #0c0c0d; transform: none; }
+.tab:hover:not(:disabled):not(.active) { background: rgba(236, 232, 223, 0.08); }
+button:disabled { opacity: 0.45; }
+input[type="range"], input[type="checkbox"] { accent-color: var(--accent); }
+
+.btn-primary, .btn-primary:hover {
+    background: var(--text); background-image: none; border: 1px solid var(--text); color: #0c0c0d;
+    font-family: var(--mono); font-weight: 500; letter-spacing: 0.03em;
+}
+.btn-primary:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); transform: none; }
+.reticle, .reticle * { stroke: var(--accent) !important; }
+
+/* Görüntünün kendi üzerinde tarih etiketi ve K/D oku var; üst üste binmesin */
+#stage-compass { display: none; }
+
+/* Seçmeli fark */
+.diff-controls { margin-top: 12px; padding: 12px; border: 1px solid var(--line-soft); background: var(--panel); }
+.diff-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+.diff-row label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); flex: 1 1 190px; min-width: 0; }
+.diff-row select { width: 100%; padding: 9px 10px; font-size: 13px; text-transform: none; letter-spacing: 0; }
+.diff-minus { font-family: var(--serif); font-size: 30px; line-height: 1; padding-bottom: 4px; color: var(--accent); }
+.diff-row .btn-primary { padding: 10px 16px; cursor: pointer; }
+.diff-row .icon-btn { width: 38px; height: 38px; }
+#diff-msg { margin: 8px 0 0; }

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Barnard's Star",
+    "ra": 269.446,
+    "dec": 4.768,
+    "fov": 4,
+    "band": 2.5,
+    "description": "Gökyüzünün en hızlı öz hareketli yıldızı (yılda ~10.4\"). Dönemler arasında kuzeye kaymasını arayın."
+  },
+  {
+    "name": "Epsilon Indi B",
+    "ra": 331.096,
+    "dec": -56.801,
+    "fov": 4,
+    "band": 2.5,
+    "description": "Yakın bir kahverengi cüce çifti (yılda ~4.7\" öz hareket). Konum 2025-2026 dönemine taşınmıştır."
+  },
+  {
+    "name": "WISE 0855",
+    "ra": 133.758,
+    "dec": -7.242,
+    "fov": 4,
+    "band": 4.6,
+    "description": "Bilinen en soğuk kahverengi cüce; yalnızca ~4.6 µm civarında parlak. Koordinat 2026 sonundaki konumudur (yılda ~8.1\" batıya kayıyor; ödevdeki 08h55m10.8s −7°14′42.5″ değeri 2010'lara aittir)."
+  },
+  {
+    "name": "RW Aurigae",
+    "ra": 76.956,
+    "dec": 30.401,
+    "fov": 4,
+    "band": 2.5,
+    "description": "Şiddetli ve düzensiz parlaklık değişimi gösteren genç (T Tauri) yıldız."
+  },
+  {
+    "name": "R Draconis",
+    "ra": 248.168,
+    "dec": 66.755,
+    "fov": 4,
+    "band": 2.5,
+    "description": "Mira tipi, ~245 günlük dönemle parlaklığı değişen kırmızı dev."
+  }
+]
