@@ -347,13 +347,4 @@ def run():
 
 
 if __name__ == "__main__":
-    run()TRAPPIST-1
-
-    print(f"\nBitti! Toplam veri: {total_mb:.1f} MB")
-    print(f"- Tek tek PNG görüntüler: ./{img_folder}/")
-    if len(frames) >= 2:
-        print(f"- GIF animasyonu: ./{output_gif}")
-
-
-if __name__ == "__main__":
     run()
