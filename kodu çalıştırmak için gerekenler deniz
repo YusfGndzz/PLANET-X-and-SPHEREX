@@ -1,0 +1,64 @@
+Bu Python kodunu yerel bilgisayarınızda çalıştırmak veya GitHub / bulut sunucusuna (Streamlit Cloud, Hugging Face vb.) yüklemek için gerekli kurulum komutları, kütüphane görevleri ve proje tanıtım metni aşağıdadır:
+
+### 1. Kurulum Komutları
+
+**Yerel Bilgisayar (Terminal / VS Code):**
+
+```bash
+pip install astroquery astropy pyvo pillow numpy requests
+
+```
+
+**Google Colab Hücresi:**
+
+```python
+!pip install -q astroquery astropy pyvo pillow numpy requests
+
+```
+
+**`requirements.txt` Dosyası (GitHub Deposu İçin):**
+Projenizi GitHub'a yüklerken ana dizine `requirements.txt` adında bir dosya açıp içine şu 6 satırı eklemeniz yeterlidir:
+
+```text
+astroquery
+astropy
+pyvo
+pillow
+numpy
+requests
+
+```
+
+---
+
+### 2. İndirilen Kütüphaneler ve Kod İçindeki Görevleri
+
+Kodda kullanılan `concurrent.futures`, `io` ve `re` modülleri Python'ın kendi standart kütüphanesinde yer aldığı için ayrıca indirilmez; dışarıdan kurulan 6 paket şu işlevleri üstlenir:
+
+| Kütüphane | Proje İçindeki Görevi |
+| --- | --- |
+| **`astroquery`** | NASA/IPAC IRSA TAP servisine ADQL sorgusu göndererek `spherex.obscore` tablosundan gözlem kayıtlarını çeker. |
+| **`pyvo`** | Virtual Observatory (VO) DataLink protokolünü çözerek her gözleme ait indirilebilir ham FITS bağlantısını bulur. |
+| **`astropy`** | Gök cismi adlarını koordinata çevirir (`SkyCoord`), FITS dosyalarını açar, WCS koordinat eşlemesiyle hedef bölgeyi keser (`Cutout2D`), zaman dönüşümü yapar (`Time`) ve astronomik parlaklık ölçeklendirmesi (`ZScale` + `Asinh`) uygular. |
+| **`numpy`** | FITS piksel matrislerini işler, boş (`NaN`) pikselleri medyan değerle doldurur ve çoklu tarihler arasından eşit zaman aralıklı örnekleme yapar. |
+| **`requests`** | Uzak NASA sunucularındaki FITS dosyalarını diske kaydetmeden doğrudan belleğe (RAM) indirir. |
+| **`pillow` (`PIL`)** | İşlenmiş astronomik kareleri RGB görüntüye çevirir, üzerlerine gözlem tarihi ile dalga boyu damgası basar ve kronolojik GIF animasyonu üretir. |
+
+---
+
+### 3. Proje Tanıtım Metni (Space Apps & GitHub `README.md` Şablonu)
+
+Yarışma teslim sayfasında ve GitHub deponuzda doğrudan kullanabileceğiniz kısa ve teknik tanıtım metni:
+
+> **SPHEREx Time-Series Sky Explorer (Planet X & SPHEREx)**
+> **Overview:**
+> This tool queries NASA/IPAC IRSA's SPHEREx archive (`spherex.obscore`) to generate chronological near-infrared time-lapse animations (GIFs) for any given celestial object name or ICRS coordinate (`RA`/`Dec`). By aligning multi-epoch cutouts within consistent spectral bands ($0.75 - 5.0\ \mu\text{m}$), the tool enables rapid visual detection of high-proper-motion objects (brown dwarfs, asteroids, comets, Planet X candidates) and variable stars.
+> **Key Features:**
+> * **Flexible Target Resolution:** Accepts object names (resolved via SIMBAD/CDS) as well as sexagesimal (`HMS/DMS`) or decimal degree coordinates.
+> * **Automated Epoch Deduplication & Sampling:** Groups dithered exposures by observation date, filters out partial edge frames via WCS footprint verification, and selects evenly spaced chronological epochs.
+> * **Astronomical Image Pipeline:** Performs real-time `Cutout2D` extraction and `ZScale + Asinh` intensity stretching on Multi-Extension FITS (MEF) data using parallel worker threads.
+> * **Verified Test Targets:** Validated on Barnard's Star, Epsilon Indi B, WISE 0855, RW Aurigae, and R Draconis.
+> 
+> 
+
+Bu `requirements.txt` ve kod yapısını doğrudan tarayıcıda çalışan bir **Streamlit** arayüzüne dönüştürüp NASA jüri üyelerinin tıklayıp deneyebileceği canlı bir web linki haline getirmemi ister misiniz?
